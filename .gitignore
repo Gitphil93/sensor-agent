@@ -1,0 +1,9 @@
+.env
+.env.*
+config.json
+*.local.json
+secrets/
+__pycache__/
+*.pyc
+recordings/
+queue/
