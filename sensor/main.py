@@ -27,20 +27,30 @@ def handle_shutdown(signum, frame):
 def tick(iteration: int):
     logging.info("Loop #%s running", iteration)
 
-    output_file = record_and_process(
-        device="plughw:1,0",
-        duration_seconds=10,
-        output_dir="recordings",
-    )
     response = check_in(
-    api_base_url=settings.API_BASE_URL,
-    api_token=settings.API_TOKEN,
-    sensor_id=settings.SENSOR_ID,
+        api_base_url=settings.API_BASE_URL,
+        api_token=settings.API_TOKEN,
+        sensor_id=settings.SENSOR_ID,
+    )
+
+    is_active = response.get("isActive", False)
+    record_seconds = response.get("recordSeconds", settings.RECORD_SECONDS)
+
+    logging.info("Check-in success: isActive=%s, recordSeconds=%s", is_active, record_seconds)
+
+    if not is_active:
+        logging.info("Sensor is inactive, skipping recording")
+        return
+
+    output_file = record_and_process(
+        device=settings.ARECORD_DEVICE,
+        duration_seconds=record_seconds,
+        output_dir=settings.OUTPUT_DIR,
     )
 
     logging.info("New sample created: %s", output_file)
 
-    #Deletes audio file directly while in dev. Todo: delete file after it's processed instead
+    # Dev behavior: delete processed file immediately
     if os.path.exists(output_file):
         os.remove(output_file)
         logging.info("Deleted processed file: %s", output_file)
@@ -54,11 +64,10 @@ def main():
     signal.signal(signal.SIGINT, handle_shutdown)
     signal.signal(signal.SIGTERM, handle_shutdown)
 
-    interval_seconds = 60
     iteration = 0
 
     logging.info("Beatmap sensor starting")
-    logging.info("Interval: %s seconds", interval_seconds)
+    logging.info("Interval: %s seconds", settings.INTERVAL_SECONDS)
 
     while running:
         iteration += 1
@@ -69,7 +78,7 @@ def main():
             logging.exception("Error in loop iteration")
 
         if running:
-            time.sleep(interval_seconds)
+            time.sleep(settings.INTERVAL_SECONDS)
 
     logging.info("Sensor stopped")
 
