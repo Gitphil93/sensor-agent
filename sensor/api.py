@@ -5,7 +5,7 @@ import json
 
 
 def check_in(api_base_url: str, api_token: str, sensor_id: str) -> dict:
-    url = f"{api_base_url.rstrip('/')}/api/sensor/heartbeat"
+    url = f"{api_base_url.rstrip('/')}/sensor/heartbeat"
 
     payload = {
         "sensorId": sensor_id,
