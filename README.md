@@ -126,5 +126,12 @@ sudo systemctl restart beatmap-sensor.service```
 
 ## View logs: 
 
-```bash journalctl -u beatmap-sensor.service -f
-```
+```bash journalctl -u beatmap-sensor.service -f```
+
+
+#Update after changes
+## Make file runnable:
+```bash chmod +x ~/update.sh```
+
+## Run with:
+```bash ~/update.sh```
