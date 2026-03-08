@@ -96,7 +96,7 @@ Type=simple
 User=username
 WorkingDirectory=/home/username/sensor-agent/sensor
 EnvironmentFile=/home/username/sensor-agent/sensor/.env
-ExecStart=/usr/bin/python3 /home/philip/sensor-agent/sensor/main.py
+ExecStart=/usr/bin/python3 /home/username/sensor-agent/sensor/main.py
 Restart=always
 RestartSec=5
 
