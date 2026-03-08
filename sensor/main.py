@@ -3,7 +3,10 @@ import os
 import signal
 import time
 
+import settings
 from audio import record_and_process
+from api import check_in
+
 
 running = True
 
@@ -29,9 +32,15 @@ def tick(iteration: int):
         duration_seconds=10,
         output_dir="recordings",
     )
+    response = check_in(
+    api_base_url=settings.API_BASE_URL,
+    api_token=settings.API_TOKEN,
+    sensor_id=settings.SENSOR_ID,
+    )
 
     logging.info("New sample created: %s", output_file)
 
+    #Deletes audio file directly while in dev. Todo: delete file after it's processed instead
     if os.path.exists(output_file):
         os.remove(output_file)
         logging.info("Deleted processed file: %s", output_file)
