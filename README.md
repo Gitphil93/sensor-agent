@@ -124,3 +124,7 @@ sudo systemctl restart beatmap-sensor.service```
 ```bash sudo systemctl daemon-reload
 sudo systemctl restart beatmap-sensor.service```
 
+## View logs: 
+
+```bash journalctl -u beatmap-sensor.service -f
+```
