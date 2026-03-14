@@ -5,8 +5,7 @@ import time
 
 import settings
 from audio import record_and_process
-from api import check_in
-
+from api import check_in, upload_audio
 
 running = True
 
@@ -24,23 +23,30 @@ def handle_shutdown(signum, frame):
     running = False
 
 
-def tick(iteration: int):
+def tick(iteration: int) -> int:
     logging.info("Loop #%s running", iteration)
 
     response = check_in(
         api_base_url=settings.API_BASE_URL,
         api_token=settings.API_TOKEN,
         sensor_id=settings.SENSOR_ID,
+        venue_id=settings.VENUE_ID,
     )
 
     is_active = response.get("isActive", False)
     record_seconds = response.get("recordSeconds", settings.RECORD_SECONDS)
+    interval_seconds = response.get("intervalSeconds", settings.INTERVAL_SECONDS)
 
-    logging.info("Check-in success: isActive=%s, recordSeconds=%s", is_active, record_seconds)
+    logging.info(
+        "Check-in success: isActive=%s, recordSeconds=%s, intervalSeconds=%s",
+        is_active,
+        record_seconds,
+        interval_seconds,
+    )
 
     if not is_active:
         logging.info("Sensor is inactive, skipping recording")
-        return
+        return interval_seconds
 
     output_file = record_and_process(
         device=settings.ARECORD_DEVICE,
@@ -50,10 +56,21 @@ def tick(iteration: int):
 
     logging.info("New sample created: %s", output_file)
 
-    # Dev behavior: delete processed file immediately
-    if os.path.exists(output_file):
+    upload_result = upload_audio(
+        api_base_url=settings.API_BASE_URL,
+        api_token=settings.API_TOKEN,
+        sensor_id=settings.SENSOR_ID,
+        venue_id=settings.VENUE_ID,
+        file_path=output_file,
+    )
+
+    logging.info("Recognition result: %s", upload_result)
+
+    if output_file and os.path.exists(output_file):
         os.remove(output_file)
         logging.info("Deleted processed file: %s", output_file)
+
+    return interval_seconds
 
 
 def main():
@@ -67,18 +84,21 @@ def main():
     iteration = 0
 
     logging.info("Beatmap sensor starting")
-    logging.info("Interval: %s seconds", settings.INTERVAL_SECONDS)
+    logging.info("Sensor ID: %s", settings.SENSOR_ID)
+    logging.info("Venue ID: %s", settings.VENUE_ID)
+    logging.info("Default interval: %s seconds", settings.INTERVAL_SECONDS)
 
     while running:
         iteration += 1
+        sleep_seconds = settings.INTERVAL_SECONDS
 
         try:
-            tick(iteration)
+            sleep_seconds = tick(iteration)
         except Exception:
             logging.exception("Error in loop iteration")
 
         if running:
-            time.sleep(settings.INTERVAL_SECONDS)
+            time.sleep(max(1, int(sleep_seconds)))
 
     logging.info("Sensor stopped")
 

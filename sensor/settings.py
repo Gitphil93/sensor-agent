@@ -12,6 +12,7 @@ def get_env(name: str, default: str | None = None) -> str:
 
 
 SENSOR_ID = get_env("SENSOR_ID")
+VENUE_ID = get_env("VENUE_ID")
 API_BASE_URL = get_env("API_BASE_URL", "")
 API_TOKEN = get_env("API_TOKEN", "")
 ARECORD_DEVICE = get_env("ARECORD_DEVICE", "plughw:1,0")
