@@ -33,12 +33,14 @@ def tick(iteration: int) -> int:
         venue_id=settings.VENUE_ID,
     )
 
+    logging.info("Heartbeat raw response: %s", response)
+
     is_active = response.get("isActive", False)
-    record_seconds = response.get("recordSeconds", settings.RECORD_SECONDS)
-    interval_seconds = response.get("intervalSeconds", settings.INTERVAL_SECONDS)
+    record_seconds = settings.RECORD_SECONDS
+    interval_seconds = settings.INTERVAL_SECONDS
 
     logging.info(
-        "Check-in success: isActive=%s, recordSeconds=%s, intervalSeconds=%s",
+        "Parsed heartbeat: isActive=%s, recordSeconds=%s, intervalSeconds=%s",
         is_active,
         record_seconds,
         interval_seconds,
@@ -55,6 +57,7 @@ def tick(iteration: int) -> int:
     )
 
     logging.info("New sample created: %s", output_file)
+    logging.info("Uploading file to server: %s", output_file)
 
     upload_result = upload_audio(
         api_base_url=settings.API_BASE_URL,
