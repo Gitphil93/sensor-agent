@@ -52,9 +52,10 @@ def record_and_process(
         raw_path,
         processed_path,
         "trim", "1.2",
-        "lowpass", "7000",
         "remix", "1",
-        "gain", "-n",
+        "lowpass", "7000",
+        "highpass", "120",
+        "norm",
     ]
 
     logging.info("Recording %s seconds...", duration_seconds)
