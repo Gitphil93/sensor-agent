@@ -51,6 +51,8 @@ def record_and_process(
         "sox",
         raw_path,
         processed_path,
+        "trim", "1.2",
+        "lowpass", "7000",
         "remix", "1",
         "gain", "-n",
     ]
